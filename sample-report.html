@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchAudit Sample Report</title>
+  <style>
+    body { margin:0; font-family: Inter, system-ui, sans-serif; background:#f6f8fc; color:#172033; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 2rem; }
+    .hero { margin-bottom: 1.5rem; }
+    .hero h1 { margin: 0 0 .5rem; font-size: 2.4rem; }
+    .muted { color:#5f6b85; }
+    .grid { display:grid; grid-template-columns: repeat(3,1fr); gap:1rem; margin:1.5rem 0; }
+    .card { background:white; border:1px solid #dde4f0; border-radius:16px; padding:1rem; box-shadow:0 10px 30px rgba(15,23,42,.05); }
+    .card strong { display:block; font-size:1.8rem; margin-top:.25rem; }
+    .section { background:white; border:1px solid #dde4f0; border-radius:18px; padding:1.25rem; margin:1rem 0; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { text-align:left; padding:.8rem; border-bottom:1px solid #e8edf6; vertical-align:top; }
+    th { font-size:.86rem; text-transform:uppercase; letter-spacing:.06em; color:#5f6b85; }
+    .pill { display:inline-block; padding:.25rem .55rem; border-radius:999px; font-size:.78rem; font-weight:700; }
+    .danger { background:#ffe3e3; color:#a12b2b; }
+    .warn { background:#fff1d6; color:#8a5b00; }
+    .ok { background:#daf8e9; color:#136c43; }
+    ul { margin:.5rem 0 0 1.2rem; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } table, thead, tbody, th, td, tr { display:block; } th { display:none; } td { padding:.6rem 0; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="muted">LaunchAudit — sample output</div>
+      <h1>Website content audit report</h1>
+      <p class="muted">Example report showing how LaunchAudit surfaces missing pages, broken URLs, title mismatches, and review-required issues before launch.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="muted">Pages checked</div><strong>184</strong></div>
+      <div class="card"><div class="muted">Expected pages</div><strong>201</strong></div>
+      <div class="card"><div class="muted">Missing pages</div><strong>9</strong></div>
+      <div class="card"><div class="muted">Broken pages</div><strong>3</strong></div>
+      <div class="card"><div class="muted">Mismatches</div><strong>14</strong></div>
+      <div class="card"><div class="muted">Review required</div><strong>7</strong></div>
+    </div>
+
+    <div class="section">
+      <h2>Executive summary</h2>
+      <p class="muted">This sample site showed a mix of missing service pages, a few broken utility URLs, and several pages that likely shipped with naming or structure drift. The most urgent gaps were in expected service URLs that were absent from the live site map.</p>
+      <ul>
+        <li>9 expected pages were not found on the live site</li>
+        <li>3 expected URLs returned broken responses</li>
+        <li>14 pages showed likely mismatch or low-confidence mapping issues</li>
+        <li>7 pages should be manually reviewed before sign-off</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Key findings</h2>
+      <table>
+        <thead>
+          <tr><th>URL</th><th>Issue</th><th>Severity</th><th>Why it matters</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>/services/seo</strong></td>
+            <td><span class="pill danger">Missing page</span></td>
+            <td>High</td>
+            <td>Expected page was not found on the live site. This likely creates a content and conversion gap.</td>
+          </tr>
+          <tr>
+            <td><strong>/contact</strong></td>
+            <td><span class="pill danger">Broken page</span></td>
+            <td>High</td>
+            <td>The expected URL exists in the page map but returns an unusable response.</td>
+          </tr>
+          <tr>
+            <td><strong>/about-us</strong></td>
+            <td><span class="pill warn">Title mismatch</span></td>
+            <td>Medium</td>
+            <td>Page intent appears to differ from the expected structure, which may confuse QA or search visibility.</td>
+          </tr>
+          <tr>
+            <td><strong>/locations/london</strong></td>
+            <td><span class="pill warn">Review required</span></td>
+            <td>Medium</td>
+            <td>Low-confidence mapping. A human should confirm whether this page satisfies the planned location-page requirement.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Recommended next actions</h2>
+      <ul>
+        <li>Restore or create all missing high-priority expected pages before launch</li>
+        <li>Fix broken expected URLs and verify status responses</li>
+        <li>Review pages flagged for title mismatch to confirm page intent and naming</li>
+        <li>Manually check all review-required pages before final sign-off</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
