@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchAudit — Catch missing, broken, and mismatched pages before launch</title>
+  <meta name="description" content="Audit your live site against the pages you planned. Catch missing pages, broken URLs, mismatches, and review-required issues before launch." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #111933;
+      --panel-2: #162242;
+      --text: #eef2ff;
+      --muted: #a6b0cf;
+      --line: rgba(255,255,255,0.1);
+      --accent: #7c5cff;
+      --accent-2: #14c5b8;
+      --danger: #ff6b6b;
+      --warning: #ffb84d;
+      --ok: #36d399;
+      --shadow: 0 20px 50px rgba(0,0,0,0.35);
+      --radius: 20px;
+      --max: 1180px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124,92,255,0.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(20,197,184,0.12), transparent 26%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(var(--max), calc(100% - 2rem)); margin: 0 auto; }
+    .nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 0; position: sticky; top: 0; z-index: 20;
+      backdrop-filter: blur(10px);
+      background: rgba(11,16,32,0.65);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .brand { font-weight: 800; letter-spacing: -0.02em; font-size: 1.1rem; }
+    .brand span { color: var(--accent-2); }
+    .nav-links { display: flex; gap: 1rem; align-items: center; color: var(--muted); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.9rem 1.2rem; border-radius: 999px; font-weight: 700;
+      border: 1px solid transparent; transition: 0.2s ease;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #9d7dff); color: white; box-shadow: var(--shadow); }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-secondary { border-color: var(--line); color: var(--text); background: rgba(255,255,255,0.02); }
+    .hero { padding: 4rem 0 3rem; }
+    .eyebrow {
+      display: inline-flex; gap: .5rem; align-items: center; padding: .4rem .75rem;
+      border-radius: 999px; background: rgba(255,255,255,0.05); color: var(--muted);
+      border: 1px solid var(--line); font-size: 0.92rem;
+    }
+    h1 {
+      font-size: clamp(2.6rem, 5vw, 5.3rem);
+      line-height: 1.02; letter-spacing: -0.04em; margin: 1.1rem 0 1rem;
+      max-width: 11ch;
+    }
+    .hero-copy {
+      max-width: 720px; color: var(--muted); font-size: 1.1rem; margin-bottom: 1.5rem;
+    }
+    .hero-actions { display: flex; gap: .9rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
+    .hero-grid {
+      display: grid; grid-template-columns: 1.15fr .85fr; gap: 2rem; align-items: start;
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;
+    }
+    .metric { padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 18px; }
+    .metric strong { display: block; font-size: 1.5rem; }
+    .metric span { color: var(--muted); font-size: 0.92rem; }
+    .report {
+      padding: 1.1rem; background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    }
+    .report-header, .issue-row {
+      display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+    }
+    .report-header { margin-bottom: 1rem; }
+    .report h3 { margin: 0; font-size: 1.05rem; }
+    .report small, .muted { color: var(--muted); }
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: .8rem; margin: 1rem 0 1.2rem;
+    }
+    .summary-card {
+      background: rgba(255,255,255,0.035); border: 1px solid var(--line); border-radius: 16px; padding: .8rem .9rem;
+    }
+    .summary-card strong { font-size: 1.4rem; display: block; }
+    .issue-list { display: grid; gap: .7rem; }
+    .issue-row {
+      padding: .85rem .9rem; background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: 14px;
+    }
+    .pill {
+      font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em;
+      padding: .28rem .55rem; border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
+    }
+    .pill-danger { background: rgba(255,107,107,0.12); color: #ffb0b0; border-color: rgba(255,107,107,0.24); }
+    .pill-warning { background: rgba(255,184,77,0.12); color: #ffd28a; border-color: rgba(255,184,77,0.24); }
+    .pill-ok { background: rgba(54,211,153,0.12); color: #96f4ca; border-color: rgba(54,211,153,0.24); }
+    section { padding: 4.5rem 0; }
+    .section-head { max-width: 720px; margin-bottom: 2rem; }
+    .section-head h2 { font-size: clamp(2rem, 3.3vw, 3.2rem); letter-spacing: -0.03em; margin: 0 0 .7rem; }
+    .section-head p { color: var(--muted); margin: 0; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .card { padding: 1.2rem; }
+    .card h3 { margin-top: 0; margin-bottom: .5rem; }
+    .card p, .card li { color: var(--muted); }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .step-num {
+      width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 999px; background: rgba(124,92,255,0.14); color: #d8ccff; margin-bottom: 1rem; font-weight: 800;
+    }
+    .offer {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .cta-band {
+      padding: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+      background: linear-gradient(135deg, rgba(124,92,255,0.18), rgba(20,197,184,0.12));
+    }
+    .footer { padding: 2rem 0 3rem; color: var(--muted); }
+    ul.clean { padding-left: 1.1rem; margin: .6rem 0 0; }
+    code.inline {
+      background: rgba(255,255,255,0.06); padding: .2rem .45rem; border-radius: 8px; border: 1px solid var(--line);
+      font-size: .92em;
+    }
+    @media (max-width: 960px) {
+      .hero-grid, .grid-3, .steps, .offer { grid-template-columns: 1fr; }
+      .metrics, .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .metrics, .summary-grid { grid-template-columns: 1fr; }
+      h1 { max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+      <div class="brand">Launch<span>Audit</span></div>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#how">How it works</a>
+        <a href="#who">Who it’s for</a>
+        <a href="#sample">Sample report</a>
+        <a href="#cta" class="btn btn-secondary">Request an audit</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">Website QA for launches, rebuilds, and migrations</div>
+          <h1>Catch missing, broken, and mismatched pages before launch.</h1>
+          <p class="hero-copy">
+            Audit your live site against the pages you planned and get a clear report of missing pages,
+            broken URLs, title mismatches, content gaps, and review-required issues — without manual spreadsheet hell.
+          </p>
+          <div class="hero-actions">
+            <a href="#cta" class="btn btn-primary">Request an audit</a>
+            <a href="#sample" class="btn btn-secondary">See sample report</a>
+          </div>
+          <div class="metrics">
+            <div class="metric"><strong>Minutes</strong><span>to produce a structured discrepancy report</span></div>
+            <div class="metric"><strong>Fewer misses</strong><span>before handoff, QA, or launch</span></div>
+            <div class="metric"><strong>API-ready</strong><span>engine under the hood for repeat workflows</span></div>
+          </div>
+        </div>
+
+        <div class="panel report" id="sample">
+          <div class="report-header">
+            <div>
+              <h3>Sample audit output</h3>
+              <small>Live site vs expected page structure</small>
+            </div>
+            <span class="pill pill-ok">Structured report</span>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-card"><span class="muted">Pages checked</span><strong>184</strong></div>
+            <div class="summary-card"><span class="muted">Expected pages</span><strong>201</strong></div>
+            <div class="summary-card"><span class="muted">Missing pages</span><strong>9</strong></div>
+            <div class="summary-card"><span class="muted">Broken pages</span><strong>3</strong></div>
+            <div class="summary-card"><span class="muted">Mismatches</span><strong>14</strong></div>
+            <div class="summary-card"><span class="muted">Review required</span><strong>7</strong></div>
+          </div>
+
+          <div class="issue-list">
+            <div class="issue-row">
+              <div>
+                <strong>/services/seo</strong>
+                <div class="muted">Expected page not found on live site</div>
+              </div>
+              <span class="pill pill-danger">Missing page</span>
+            </div>
+            <div class="issue-row">
+              <div>
+                <strong>/contact</strong>
+                <div class="muted">Page exists but returns a broken response</div>
+              </div>
+              <span class="pill pill-danger">Broken page</span>
+            </div>
+            <div class="issue-row">
+              <div>
+                <strong>/about-us</strong>
+                <div class="muted">Title appears inconsistent with expected page intent</div>
+              </div>
+              <span class="pill pill-warning">Title mismatch</span>
+            </div>
+            <div class="issue-row">
+              <div>
+                <strong>/locations/london</strong>
+                <div class="muted">Low-confidence mapping; manual review recommended</div>
+              </div>
+              <span class="pill pill-warning">Review required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <div class="container">
+        <div class="section-head">
+          <h2>Manual website QA misses things.</h2>
+          <p>
+            Redesigns, migrations, and content launches often end with teams comparing spreadsheets to live pages by hand.
+            That’s slow, inconsistent, and exactly where missing URLs and mismatched pages slip through.
+          </p>
+        </div>
+        <div class="grid-3">
+          <div class="panel card">
+            <h3>Launches ship with holes</h3>
+            <p>Expected pages get skipped, renamed, or quietly dropped during implementation.</p>
+          </div>
+          <div class="panel card">
+            <h3>QA is spreadsheet-heavy</h3>
+            <p>Teams still spend hours checking page maps, links, statuses, and metadata manually.</p>
+          </div>
+          <div class="panel card">
+            <h3>Clients notice late</h3>
+            <p>Missing and broken pages often show up after handoff, launch, or campaign traffic starts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <h2>What the audit catches</h2>
+          <p>
+            LaunchAudit compares your live site against the structure you expected to ship and returns a clean discrepancy report.
+          </p>
+        </div>
+        <div class="grid-3">
+          <div class="panel card">
+            <h3>Missing pages</h3>
+            <p>Pages that should exist but never made it live.</p>
+          </div>
+          <div class="panel card">
+            <h3>Broken pages</h3>
+            <p>Expected URLs that exist but return bad responses or errors.</p>
+          </div>
+          <div class="panel card">
+            <h3>Title mismatches</h3>
+            <p>Pages whose metadata or headings don’t line up with the expected page intent.</p>
+          </div>
+          <div class="panel card">
+            <h3>Content gaps</h3>
+            <p>Signals that key expected content isn’t represented cleanly on the live site.</p>
+          </div>
+          <div class="panel card">
+            <h3>Review-required pages</h3>
+            <p>Ambiguous or low-confidence matches that need a human check before sign-off.</p>
+          </div>
+          <div class="panel card">
+            <h3>Structure drift</h3>
+            <p>Places where the content map and the live implementation no longer align.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="container">
+        <div class="section-head">
+          <h2>How it works</h2>
+          <p>Start with the outcome first: clear visibility into what shipped, what broke, and what needs attention next.</p>
+        </div>
+        <div class="steps">
+          <div class="panel card">
+            <div class="step-num">1</div>
+            <h3>Share your site and page map</h3>
+            <p>Send your site URL plus the expected pages, sitemap, or content map you want checked.</p>
+          </div>
+          <div class="panel card">
+            <div class="step-num">2</div>
+            <h3>Run the audit</h3>
+            <p>The engine crawls the live site and compares what exists against what should exist.</p>
+          </div>
+          <div class="panel card">
+            <div class="step-num">3</div>
+            <h3>Get a usable report</h3>
+            <p>Receive a structured summary of missing pages, broken URLs, mismatches, and review-required issues.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="who">
+      <div class="container">
+        <div class="section-head">
+          <h2>Built for teams shipping content-heavy websites</h2>
+          <p>This is strongest where page maps, migrations, launch QA, and content structure matter.</p>
+        </div>
+        <div class="offer">
+          <div class="panel card">
+            <h3>Best fit</h3>
+            <ul class="clean">
+              <li>Agencies</li>
+              <li>SEO/content teams</li>
+              <li>Rebuild and migration projects</li>
+              <li>Launch QA workflows</li>
+              <li>Internal marketing teams with large site maps</li>
+            </ul>
+          </div>
+          <div class="panel card">
+            <h3>How it can be delivered</h3>
+            <ul class="clean">
+              <li>One-off pre-launch audit</li>
+              <li>Migration discrepancy report</li>
+              <li>Ongoing agency QA support</li>
+              <li>Internal workflow rollout</li>
+              <li>API access later for product teams</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <h2>Built as a structured audit engine, not a black box</h2>
+          <p>
+            The public offer starts with the outcome — a clear audit report — but the underlying system is designed as a reusable engine
+            that can support repeat audits, internal workflows, and future API integrations.
+          </p>
+        </div>
+        <div class="panel card">
+          <h3>Under the hood</h3>
+          <p>
+            LaunchAudit is powered by a site-crawling and discrepancy-detection workflow that checks explicit expected URLs first,
+            then uses structured analysis to flag missing pages, broken pages, title mismatches, content gaps, and review-required cases.
+          </p>
+          <p class="muted">For technical teams, API-based access can follow once the audit output is fully standardized.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta">
+      <div class="container">
+        <div class="panel cta-band">
+          <div>
+            <h2 style="margin:0 0 .5rem; font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing:-0.03em;">Want to see what your site missed?</h2>
+            <p class="muted" style="margin:0; max-width: 720px;">
+              Start with a one-off audit for a launch, rebuild, or migration project — then decide whether you want ongoing QA support or product access.
+            </p>
+          </div>
+          <div style="display:flex; gap:.8rem; flex-wrap:wrap;">
+            <a class="btn btn-primary" href="mailto:hello@launchaudit.co?subject=Request%20an%20audit">Request an audit</a>
+            <a class="btn btn-secondary" href="mailto:hello@launchaudit.co?subject=Sample%20report%20request">See sample report</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container" style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>LaunchAudit — website content QA for launches, rebuilds, and migrations.</div>
+      <div>Powered by a structured site audit engine.</div>
+    </div>
+  </footer>
+</body>
+</html>
