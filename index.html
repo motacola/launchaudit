@@ -50,6 +50,7 @@
       display: inline-flex; align-items: center; justify-content: center;
       padding: 0.9rem 1.2rem; border-radius: 999px; font-weight: 700;
       border: 1px solid transparent; transition: 0.2s ease;
+      cursor: pointer;
     }
     .btn-primary { background: linear-gradient(135deg, var(--accent), #9d7dff); color: white; box-shadow: var(--shadow); }
     .btn-primary:hover { transform: translateY(-1px); }
@@ -131,12 +132,23 @@
     }
     .footer { padding: 2rem 0 3rem; color: var(--muted); }
     ul.clean { padding-left: 1.1rem; margin: .6rem 0 0; }
-    code.inline {
-      background: rgba(255,255,255,0.06); padding: .2rem .45rem; border-radius: 8px; border: 1px solid var(--line);
-      font-size: .92em;
+    .form-wrap { display:grid; grid-template-columns: 1.1fr .9fr; gap:1rem; align-items:start; }
+    form.lead-form { display:grid; gap:.9rem; }
+    .field { display:grid; gap:.35rem; }
+    .field label { font-size:.92rem; color:var(--muted); }
+    .field input, .field textarea, .field select {
+      width:100%; padding:.9rem 1rem; border-radius:14px; border:1px solid var(--line);
+      background: rgba(255,255,255,0.04); color: var(--text); font: inherit;
+    }
+    .field textarea { min-height: 120px; resize: vertical; }
+    .fine { color: var(--muted); font-size:.9rem; }
+    .badge-row { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .mini-badge {
+      padding:.35rem .65rem; border-radius:999px; border:1px solid var(--line);
+      background:rgba(255,255,255,0.03); color:var(--muted); font-size:.85rem;
     }
     @media (max-width: 960px) {
-      .hero-grid, .grid-3, .steps, .offer { grid-template-columns: 1fr; }
+      .hero-grid, .grid-3, .steps, .offer, .form-wrap { grid-template-columns: 1fr; }
       .metrics, .summary-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
@@ -268,30 +280,12 @@
           </p>
         </div>
         <div class="grid-3">
-          <div class="panel card">
-            <h3>Missing pages</h3>
-            <p>Pages that should exist but never made it live.</p>
-          </div>
-          <div class="panel card">
-            <h3>Broken pages</h3>
-            <p>Expected URLs that exist but return bad responses or errors.</p>
-          </div>
-          <div class="panel card">
-            <h3>Title mismatches</h3>
-            <p>Pages whose metadata or headings don’t line up with the expected page intent.</p>
-          </div>
-          <div class="panel card">
-            <h3>Content gaps</h3>
-            <p>Signals that key expected content isn’t represented cleanly on the live site.</p>
-          </div>
-          <div class="panel card">
-            <h3>Review-required pages</h3>
-            <p>Ambiguous or low-confidence matches that need a human check before sign-off.</p>
-          </div>
-          <div class="panel card">
-            <h3>Structure drift</h3>
-            <p>Places where the content map and the live implementation no longer align.</p>
-          </div>
+          <div class="panel card"><h3>Missing pages</h3><p>Pages that should exist but never made it live.</p></div>
+          <div class="panel card"><h3>Broken pages</h3><p>Expected URLs that exist but return bad responses or errors.</p></div>
+          <div class="panel card"><h3>Title mismatches</h3><p>Pages whose metadata or headings don’t line up with the expected page intent.</p></div>
+          <div class="panel card"><h3>Content gaps</h3><p>Signals that key expected content isn’t represented cleanly on the live site.</p></div>
+          <div class="panel card"><h3>Review-required pages</h3><p>Ambiguous or low-confidence matches that need a human check before sign-off.</p></div>
+          <div class="panel card"><h3>Structure drift</h3><p>Places where the content map and the live implementation no longer align.</p></div>
         </div>
       </div>
     </section>
@@ -303,21 +297,9 @@
           <p>Start with the outcome first: clear visibility into what shipped, what broke, and what needs attention next.</p>
         </div>
         <div class="steps">
-          <div class="panel card">
-            <div class="step-num">1</div>
-            <h3>Share your site and page map</h3>
-            <p>Send your site URL plus the expected pages, sitemap, or content map you want checked.</p>
-          </div>
-          <div class="panel card">
-            <div class="step-num">2</div>
-            <h3>Run the audit</h3>
-            <p>The engine crawls the live site and compares what exists against what should exist.</p>
-          </div>
-          <div class="panel card">
-            <div class="step-num">3</div>
-            <h3>Get a usable report</h3>
-            <p>Receive a structured summary of missing pages, broken URLs, mismatches, and review-required issues.</p>
-          </div>
+          <div class="panel card"><div class="step-num">1</div><h3>Share your site and page map</h3><p>Send your site URL plus the expected pages, sitemap, or content map you want checked.</p></div>
+          <div class="panel card"><div class="step-num">2</div><h3>Run the audit</h3><p>The engine crawls the live site and compares what exists against what should exist.</p></div>
+          <div class="panel card"><div class="step-num">3</div><h3>Get a usable report</h3><p>Receive a structured summary of missing pages, broken URLs, mismatches, and review-required issues.</p></div>
         </div>
       </div>
     </section>
@@ -332,21 +314,13 @@
           <div class="panel card">
             <h3>Best fit</h3>
             <ul class="clean">
-              <li>Agencies</li>
-              <li>SEO/content teams</li>
-              <li>Rebuild and migration projects</li>
-              <li>Launch QA workflows</li>
-              <li>Internal marketing teams with large site maps</li>
+              <li>Agencies</li><li>SEO/content teams</li><li>Rebuild and migration projects</li><li>Launch QA workflows</li><li>Internal marketing teams with large site maps</li>
             </ul>
           </div>
           <div class="panel card">
             <h3>How it can be delivered</h3>
             <ul class="clean">
-              <li>One-off pre-launch audit</li>
-              <li>Migration discrepancy report</li>
-              <li>Ongoing agency QA support</li>
-              <li>Internal workflow rollout</li>
-              <li>API access later for product teams</li>
+              <li>One-off pre-launch audit</li><li>Migration discrepancy report</li><li>Ongoing agency QA support</li><li>Internal workflow rollout</li><li>API access later for product teams</li>
             </ul>
           </div>
         </div>
@@ -375,16 +349,69 @@
 
     <section id="cta">
       <div class="container">
-        <div class="panel cta-band">
+        <div class="panel cta-band" style="margin-bottom:1rem;">
           <div>
-            <h2 style="margin:0 0 .5rem; font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing:-0.03em;">Want to see what your site missed?</h2>
+            <h2 style="margin:0 0 .5rem; font-size: clamp(1.8rem, 3vw, 2.6rem); letter-spacing:-0.03em;">Start with a real audit request</h2>
             <p class="muted" style="margin:0; max-width: 720px;">
-              Start with a one-off audit for a launch, rebuild, or migration project — then decide whether you want ongoing QA support or product access.
+              If you’re planning a launch, rebuild, or migration, send the basics and we’ll use that to shape the first delivery workflow.
             </p>
           </div>
-          <div style="display:flex; gap:.8rem; flex-wrap:wrap;">
-            <a class="btn btn-primary" href="mailto:hello@launchaudit.co?subject=Request%20an%20audit">Request an audit</a>
-            <a class="btn btn-secondary" href="mailto:hello@launchaudit.co?subject=Sample%20report%20request">See sample report</a>
+          <div class="badge-row">
+            <span class="mini-badge">One-off audit</span>
+            <span class="mini-badge">Migration QA</span>
+            <span class="mini-badge">Launch readiness</span>
+            <span class="mini-badge">Early access</span>
+          </div>
+        </div>
+        <div class="form-wrap">
+          <div class="panel card">
+            <form class="lead-form" name="audit-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
+              <input type="hidden" name="form-name" value="audit-request" />
+              <p hidden>
+                <label>Don’t fill this out: <input name="bot-field" /></label>
+              </p>
+              <div class="field">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" required />
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required />
+              </div>
+              <div class="field">
+                <label for="company">Company / team</label>
+                <input id="company" name="company" type="text" />
+              </div>
+              <div class="field">
+                <label for="site_url">Site URL</label>
+                <input id="site_url" name="site_url" type="url" placeholder="https://example.com" required />
+              </div>
+              <div class="field">
+                <label for="use_case">What are you trying to catch?</label>
+                <select id="use_case" name="use_case">
+                  <option>Pre-launch audit</option>
+                  <option>Migration / rebuild QA</option>
+                  <option>Ongoing content QA</option>
+                  <option>Internal team workflow</option>
+                  <option>API / technical interest</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="details">Context</label>
+                <textarea id="details" name="details" placeholder="Tell us what stage you’re at, how big the site is, or what keeps slipping through QA."></textarea>
+              </div>
+              <button class="btn btn-primary" type="submit">Request an audit</button>
+              <div class="fine">This sends a simple lead request through the site so we can follow up with the right workflow.</div>
+            </form>
+          </div>
+          <div class="panel card">
+            <h3 style="margin-top:0;">Prefer a direct next step?</h3>
+            <p class="muted">If you don’t want to fill a form, use one of these paths instead.</p>
+            <div style="display:grid; gap:.8rem;">
+              <a class="btn btn-secondary" href="mailto:chrisbelgrave@gmail.com?subject=LaunchAudit%20audit%20request">Email audit request</a>
+              <a class="btn btn-secondary" href="mailto:chrisbelgrave@gmail.com?subject=LaunchAudit%20sample%20report%20request">Request sample report</a>
+            </div>
+            <div class="fine" style="margin-top:1rem;">Current best fit: agencies, SEO/content teams, and migration/rebuild projects that need a discrepancy report before launch or handoff.</div>
           </div>
         </div>
       </div>
